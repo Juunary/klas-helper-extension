@@ -82,7 +82,7 @@ export default () => {
   const checkAndAddButton = setInterval(() => {
     const klasHelperText = $('.klas-helper-text');
     if (klasHelperText.length > 0) {
-      klasHelperText.after(noticeButton);
+      // klasHelperText.after(noticeButton);
       clearInterval(checkAndAddButton);
     }
   }, 100);
