@@ -65,7 +65,11 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "update_url": "https://raw.githubusercontent.com/klas-helper/klas-helper-extension/main/update/manifest.json"
+      "id": "klas-helper@kw-service",
+      "update_url": "https://raw.githubusercontent.com/klas-helper/klas-helper-extension/main/update/manifest.json",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }
