@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.1.0 (2026.02.26)
+
+- [Fixed] Firefox 지원을 추가하였습니다. (https://github.com/kw-service/klas-helper-extension/pull/40)
+- [Removed] 공지사항 기능을 삭제했습니다.
+
 ## 2.2.0.0 (2025.06.12)
 
 - [Added] 온라인 강의 인증시 번호를 자동으로 Trim 하도록 변경하였습니다. (https://github.com/kw-service/klas-helper-extension/pull/36)
