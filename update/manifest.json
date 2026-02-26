@@ -33,6 +33,10 @@
           {
             "version": "1.2.0.0",
             "update_link": "https://github.com/klas-helper/klas-helper-extension/releases/download/v1.2.0.0/klas_helper-1.2.0.0.xpi"
+          },
+          {
+            "version": "2.2.1.0",
+            "update_link": "https://github.com/klas-helper/klas-helper-extension/releases/download/v2.2.1.0/klas_helper-2.2.1.0.xpi"
           }
         ]
       }
