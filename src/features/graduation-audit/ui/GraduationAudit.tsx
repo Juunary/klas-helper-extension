@@ -46,11 +46,8 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
         const { createRuleRegistry } = await import('../engine/RuleRegistry');
         const ruleRegistry = createRuleRegistry();
 
-        // 학생 데이터 수집
+        // 학생 데이터 수집 (실패 시 collectStudentData 내부에서 throw)
         const studentData = collectStudentData();
-        if (!studentData) {
-          throw new Error('학생 정보를 불러올 수 없습니다. 성적 조회 페이지에서 실행해주세요.');
-        }
 
         // 심사 실행
         const engine = new GraduationAuditEngine(ruleRegistry);

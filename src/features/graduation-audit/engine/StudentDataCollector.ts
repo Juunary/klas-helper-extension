@@ -5,6 +5,8 @@
 
 import type { CourseClassification, Grade, StudentCourse, StudentData } from './types';
 
+declare var appModule: any;
+
 /**
  * 성적이 통과 상태인지 판별
  */
@@ -173,36 +175,45 @@ function extractCourses(sungjuk: any[]): StudentCourse[] {
 /**
  * KLAS 성적 조회 페이지에서 학생 정보를 수집한다.
  * appModule.$data.sungjuk이 로드되어야 한다.
+ * 실패 시 null 대신 구체적인 이유를 담은 Error를 throw한다.
  */
-export function collectStudentData(): StudentData | null {
+export function collectStudentData(): StudentData {
   // 학번 추출
   const studentId = extractStudentId();
   if (!studentId) {
-    console.warn('[GraduationAudit] Failed to extract student ID');
-    return null;
+    const link = document.querySelector('a[href*="/std/ads/admst/MyInfoStdPage.do"]');
+    if (!link) {
+      throw new Error('[진단] 학번 링크를 찾을 수 없습니다. KLAS에 로그인되어 있는지 확인해주세요.');
+    }
+    throw new Error(`[진단] 학번 링크는 있으나 학번 파싱 실패. 링크 텍스트: "${link.textContent}"`);
   }
+
+  console.log('[GraduationAudit] 학번:', studentId);
 
   // 학번 파싱
   const parsed = parseStudentId(studentId);
   if (!parsed) {
-    console.warn('[GraduationAudit] Failed to parse student ID:', studentId);
-    return null;
+    throw new Error(`[진단] 학번(${studentId})에서 입학년도/학과코드 추출 실패. 학번 길이: ${studentId.length}`);
   }
 
   const { admissionYear, departmentCode } = parsed;
+  console.log('[GraduationAudit] 입학년도:', admissionYear, '학과코드:', departmentCode);
 
   // 학과 정보 조회
   const deptInfo = getDepartmentInfo(departmentCode);
   if (!deptInfo) {
-    console.warn('[GraduationAudit] Unknown department code:', departmentCode);
-    return null;
+    throw new Error(`[진단] 학과코드 ${departmentCode}이 DB에 없습니다. 학번: ${studentId}`);
   }
 
   // appModule.$data.sungjuk에서 수강 이력 추출
-  const appModule = (window as any).appModule;
-  if (!appModule || !appModule.$data || !appModule.$data.sungjuk) {
-    console.warn('[GraduationAudit] appModule.$data.sungjuk not found');
-    return null;
+  if (typeof appModule === 'undefined' || !appModule) {
+    throw new Error('[진단] appModule이 존재하지 않습니다.');
+  }
+  if (!appModule.$data) {
+    throw new Error('[진단] appModule.$data가 없습니다. appModule 타입: ' + typeof appModule);
+  }
+  if (!appModule.$data.sungjuk) {
+    throw new Error('[진단] appModule.$data.sungjuk이 없습니다. 성적 데이터가 아직 로드되지 않았을 수 있습니다.');
   }
 
   const courses = extractCourses(appModule.$data.sungjuk);
