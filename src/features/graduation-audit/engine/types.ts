@@ -88,6 +88,7 @@ export interface RequirementResult {
     items: string[];            // 과목명 배열
     credits?: number;           // 부족 학점
   };
+  matchedCourses?: StudentCourse[];  // 이 요건에 해당하는 과목들 (상세 보기용)
   sourceNote?: string;          // 규칙 출처
 }
 
@@ -98,6 +99,8 @@ export interface AuditResult {
   college: string;
   department: string;
   appliedRule: GraduationRule | null;  // 적용된 규칙 (없으면 null)
+  currentSemester?: { year: number; semester: number };  // 감지된 현재(최신) 학기
+  excludedCurrentSemester?: boolean;  // 현재 학기 제외 여부
 
   overallStatus: 'eligible' | 'pending' | 'ineligible' | 'unregistered';
   // eligible: 졸업 가능
