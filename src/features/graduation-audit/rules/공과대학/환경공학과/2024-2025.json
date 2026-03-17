@@ -1,0 +1,38 @@
+{
+  "admissionYears": [2024, 2025],
+  "college": "공과대학",
+  "department": "환경공학과",
+  "programType": "engineering",
+  "totalCreditsRequired": 133,
+  "sourceNote": "공학인증제도 안내 p.52, 졸업이수학점 p.55",
+  "lastUpdated": "2025-03-17",
+  "liberalArts": {
+    "mandatoryCredits": 1,
+    "mandatoryCourses": ["광운인되기"],
+    "balancedMinCredits": 30,
+    "balancedNote": "8개 영역 중 4개 영역 이상에서 각 10과목×3학점"
+  },
+  "msc": {
+    "minCredits": 24,
+    "note": "수학·기초과학·전산학 영역에서 필수과목 포함하여 이수"
+  },
+  "major": {
+    "totalMinCredits": 60,
+    "designMinCredits": 12,
+    "mandatoryCourseNames": [
+      "공학설계입문",
+      "캡스톤설계",
+      "환경기초실험",
+      "환경공정실험",
+      "환경반응공학"
+    ],
+    "mandatoryNote": "전공필수 과목 목록은 학과 홈페이지 참조 (설계 12학점 포함)"
+  },
+  "manualChecks": [
+    {
+      "id": "engineering_program",
+      "title": "공학프로그램 이수 여부",
+      "description": "공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요"
+    }
+  ]
+}
