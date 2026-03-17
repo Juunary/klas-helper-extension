@@ -4,6 +4,9 @@
  */
 
 import {
+  GraduationAudit,
+} from '../features/graduation-audit/index';
+import {
   addListenerByTimer,
 } from '../utils/dom';
 import {
@@ -145,6 +148,105 @@ const handleCalculateGPA = () => {
         },
       },
     });
+  }
+
+  // 졸업 심사 버튼 추가
+  injectGraduationAuditButton();
+};
+
+/**
+ * 졸업 심사 버튼을 주입하고 클릭 이벤트 처리
+ */
+const injectGraduationAuditButton = () => {
+  if ($('#graduation-audit-btn').length > 0) return; // 이미 주입됨
+
+  const button = $(`
+    <button id="graduation-audit-btn" style="
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #1890ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    ">
+      📋 KLAS Helper 졸업심사 열기
+    </button>
+  `);
+
+  button.click(() => {
+    showGraduationAuditPanel();
+  });
+
+  $('#synthesis-score-table').after(button);
+};
+
+/**
+ * 졸업 심사 패널을 표시
+ */
+const showGraduationAuditPanel = () => {
+  const panelId = 'graduation-audit-panel';
+
+  // 이미 열려있으면 스크롤만
+  if ($(`#${panelId}`).length > 0) {
+    $(`#${panelId}`)[0].scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  // 새 패널 생성
+  const panel = $(`
+    <div id="${panelId}" style="
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      border: 1px solid #d9d9d9;
+    ">
+      <div id="graduation-audit-root" style="
+        background-color: white;
+        border-radius: 4px;
+      "></div>
+    </div>
+  `);
+
+  // DOM에 추가
+  $('#synthesis-score-table').after(panel);
+
+  // React 컴포넌트 마운트 (나중에 구현)
+  // 현재는 로딩 메시지 표시
+  const root = document.getElementById('graduation-audit-root');
+  if (root) {
+    root.innerHTML = '<div style="padding: 20px; text-align: center;">졸업 심사 패널을 로드 중입니다...</div>';
+  }
+
+  // 동적으로 React 컴포넌트 로드 및 렌더링
+  // (webpack이 code splitting을 지원하면 동적 import 사용)
+  try {
+    import('../features/graduation-audit/index').then((module) => {
+      if (root) {
+        const React = window.React;
+        const ReactDOM = window.ReactDOM;
+        if (React && ReactDOM) {
+          const { default: GraduationAudit } = module;
+          const closeHandler = () => {
+            $(`#${panelId}`).remove();
+          };
+          ReactDOM.createRoot(root).render(
+            React.createElement(GraduationAudit, { onClose: closeHandler })
+          );
+        }
+      }
+    }).catch((err) => {
+      console.error('Failed to load GraduationAudit:', err);
+      if (root) {
+        root.innerHTML = '<div style="padding: 20px; color: red;">졸업 심사 패널을 로드할 수 없습니다.</div>';
+      }
+    });
+  }
+  catch (err) {
+    console.error('Error showing graduation audit panel:', err);
   }
 };
 
