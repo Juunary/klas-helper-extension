@@ -3,9 +3,9 @@
  * 페이지 주소: https://klas.kw.ac.kr/std/cps/inqire/AtnlcScreStdPage.do
  */
 
-import {
-  GraduationAudit,
-} from '../features/graduation-audit/index';
+import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { GraduationAudit } from '../features/graduation-audit/index';
 import {
   addListenerByTimer,
 } from '../utils/dom';
@@ -214,39 +214,15 @@ const showGraduationAuditPanel = () => {
   // DOM에 추가
   $('#synthesis-score-table').after(panel);
 
-  // React 컴포넌트 마운트 (나중에 구현)
-  // 현재는 로딩 메시지 표시
+  // React 컴포넌트 렌더링
   const root = document.getElementById('graduation-audit-root');
   if (root) {
-    root.innerHTML = '<div style="padding: 20px; text-align: center;">졸업 심사 패널을 로드 중입니다...</div>';
-  }
-
-  // 동적으로 React 컴포넌트 로드 및 렌더링
-  // (webpack이 code splitting을 지원하면 동적 import 사용)
-  try {
-    import('../features/graduation-audit/index').then((module) => {
-      if (root) {
-        const React = window.React;
-        const ReactDOM = window.ReactDOM;
-        if (React && ReactDOM) {
-          const { default: GraduationAudit } = module;
-          const closeHandler = () => {
-            $(`#${panelId}`).remove();
-          };
-          ReactDOM.createRoot(root).render(
-            React.createElement(GraduationAudit, { onClose: closeHandler })
-          );
-        }
-      }
-    }).catch((err) => {
-      console.error('Failed to load GraduationAudit:', err);
-      if (root) {
-        root.innerHTML = '<div style="padding: 20px; color: red;">졸업 심사 패널을 로드할 수 없습니다.</div>';
-      }
-    });
-  }
-  catch (err) {
-    console.error('Error showing graduation audit panel:', err);
+    const closeHandler = () => {
+      $(`#${panelId}`).remove();
+    };
+    createRoot(root).render(
+      createElement(GraduationAudit, { onClose: closeHandler })
+    );
   }
 };
 
