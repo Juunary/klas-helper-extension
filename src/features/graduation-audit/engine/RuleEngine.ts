@@ -221,7 +221,19 @@ export class GraduationAuditEngine {
    * MSC(수학·기초과학·전산학) 학점 심사
    */
   private checkMSCCredits(courses: StudentCourse[], rule: GraduationRule): RequirementResult {
-    const mscCourses = getPassedCourses(courses).filter((c) => isMSCClassification(c.classification));
+    const liberalArtsMandatory = rule.liberalArts.mandatoryCourses;
+    const eligibleNames = rule.msc.eligibleCourseNames ?? [];
+
+    const mscCourses = getPassedCourses(courses).filter((c) => {
+      // 기필/기선은 전부 MSC
+      if (isMSCClassification(c.classification)) return true;
+      // 교선/교필은 eligibleCourseNames에 있는 과목만, 교양필수(광운인되기 등) 제외
+      if (c.classification === '교선' || c.classification === '교필') {
+        if (liberalArtsMandatory.some((name) => courseNameMatch(c.name, name))) return false;
+        return eligibleNames.some((name) => courseNameMatch(c.name, name));
+      }
+      return false;
+    });
     const earned = mscCourses.reduce((sum, course) => sum + course.credits, 0);
     const required = rule.msc.minCredits;
 
@@ -337,12 +349,17 @@ export class GraduationAuditEngine {
    * 학생 졸업 심사 실행
    */
   audit(studentData: StudentData, rule: GraduationRule, options?: { excludeCurrentSemester?: boolean }): AuditResult {
-    const currentSemester = detectCurrentSemester(studentData.courses);
+    // currentSemester: raw sungjuk 기준 최신 학기 (성적 미확정 학기 포함, UI 표시용)
+    const currentSemester = studentData.currentSemester ?? detectCurrentSemester(studentData.courses);
+    // lastCompletedSemester: 실제 성적이 있는 마지막 학기 (제외 대상)
+    const lastCompletedSemester = detectCurrentSemester(studentData.courses);
 
     let courses = studentData.courses;
-    if (options?.excludeCurrentSemester && currentSemester) {
+    let excludedSemester: { year: number; semester: number } | undefined;
+    if (options?.excludeCurrentSemester && lastCompletedSemester) {
+      excludedSemester = lastCompletedSemester;
       courses = courses.filter(
-        (c) => !(c.year === currentSemester.year && c.semester === currentSemester.semester)
+        (c) => !(c.year === lastCompletedSemester.year && c.semester === lastCompletedSemester.semester)
       );
     }
 
@@ -389,6 +406,7 @@ export class GraduationAuditEngine {
       department: studentData.department,
       appliedRule: rule,
       currentSemester: currentSemester ?? undefined,
+      excludedSemester,
       excludedCurrentSemester: options?.excludeCurrentSemester ?? false,
       overallStatus,
       totalCredits,

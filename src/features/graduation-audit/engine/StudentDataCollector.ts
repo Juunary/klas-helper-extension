@@ -216,7 +216,20 @@ export function collectStudentData(): StudentData {
     throw new Error('[진단] appModule.$data.sungjuk이 없습니다. 성적 데이터가 아직 로드되지 않았을 수 있습니다.');
   }
 
-  const courses = extractCourses(appModule.$data.sungjuk);
+  const sungjuk: any[] = appModule.$data.sungjuk;
+  const courses = extractCourses(sungjuk);
+
+  // 성적 유효성과 무관하게 sungjuk 원본에서 최신 학기 감지
+  // (현재 학기는 성적 미확정이라 courses에 없을 수 있음)
+  let currentSemester: { year: number; semester: number } | undefined;
+  for (const s of sungjuk) {
+    const y = parseInt(s.thisYear, 10);
+    const sem = parseInt(s.hakgi, 10);
+    if (isNaN(y) || isNaN(sem)) continue;
+    if (!currentSemester || y > currentSemester.year || (y === currentSemester.year && sem > currentSemester.semester)) {
+      currentSemester = { year: y, semester: sem };
+    }
+  }
 
   return {
     studentId,
@@ -225,6 +238,7 @@ export function collectStudentData(): StudentData {
     college: deptInfo.college,
     department: deptInfo.department,
     courses,
+    currentSemester,
   };
 }
 

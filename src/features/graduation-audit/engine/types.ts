@@ -34,6 +34,7 @@ export interface StudentData {
   college: string;               // 단과대명 (e.g., "전자정보공과대학")
   department: string;            // 학과명 (e.g., "전자공학과")
   courses: StudentCourse[];      // 수강 이력
+  currentSemester?: { year: number; semester: number };  // sungjuk 원본에서 감지한 최신 학기 (성적 미확정 학기 포함)
 }
 
 /** 졸업 요건 규칙 */
@@ -57,6 +58,7 @@ export interface GraduationRule {
     minCredits: number;          // MSC(수학·기초과학·전산학) 최소 학점
     note?: string;               // 설명
     mandatoryCourses?: string[]; // 필수 과목명 (선택사항)
+    eligibleCourseNames?: string[]; // 교선/교필 이수구분 중 MSC로 인정되는 과목명 목록
   };
 
   major: {
@@ -99,7 +101,8 @@ export interface AuditResult {
   college: string;
   department: string;
   appliedRule: GraduationRule | null;  // 적용된 규칙 (없으면 null)
-  currentSemester?: { year: number; semester: number };  // 감지된 현재(최신) 학기
+  currentSemester?: { year: number; semester: number };  // raw sungjuk 기준 최신 학기 (성적 미확정 포함)
+  excludedSemester?: { year: number; semester: number }; // 실제로 제외된 학기 (성적이 있는 마지막 학기)
   excludedCurrentSemester?: boolean;  // 현재 학기 제외 여부
 
   overallStatus: 'eligible' | 'pending' | 'ineligible' | 'unregistered';

@@ -9,6 +9,24 @@ import type { GraduationRule } from './types';
 // 규칙들을 TypeScript 상수로 정의 (import 대신)
 // 각 규칙 파일의 내용을 직접 포함
 
+/**
+ * 교선/교필로 분류된 과목 중 MSC(수학·기초과학·전산학)로 인정되는 과목명 목록
+ * courseNameMatch의 부분매칭을 사용하므로 '대학수학'은 '대학수학1', '대학수학및연습1' 등을 모두 포함
+ */
+const MSC_ELIGIBLE_COMMON = [
+  '대학수학', '공학수학', '선형대수학', '확률및통계', '미적분학',
+  '대학물리', '대학화학', '일반물리', '일반화학', '생명과학', '생물학',
+  'C프로그래밍', '컴퓨팅사고', '수치해석', '이산수학',
+  '공학기초', '전산학개론', '컴퓨터개론',
+];
+
+/** 소프트웨어학부 MSC 과목 (수학 중심) */
+const MSC_ELIGIBLE_SW = [
+  '대학수학', '공학수학', '선형대수학', '확률및통계', '미적분학',
+  '이산수학', 'C프로그래밍', '컴퓨팅사고', '수치해석',
+  '대학물리', '일반물리', '대학화학', '일반화학',
+];
+
 const rule_전자공학과_2024_2025: GraduationRule = {
   admissionYears: [2024, 2025],
   college: '전자정보공과대학',
@@ -36,6 +54,7 @@ const rule_전자공학과_2024_2025: GraduationRule = {
       'C프로그래밍',
       'C프로그래밍응용',
     ],
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -80,6 +99,7 @@ const rule_전자통신공학과_2024_2025: GraduationRule = {
       '확률및통계',
       '대학물리1',
     ],
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -113,6 +133,7 @@ const rule_컴퓨터정보공학부_2024_2025: GraduationRule = {
   msc: {
     minCredits: 27,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -146,6 +167,7 @@ const rule_소프트웨어학부_2024_2025: GraduationRule = {
   msc: {
     minCredits: 12,
     note: '수학 최소 6학점, 기초과학 최소 3학점 포함',
+    eligibleCourseNames: MSC_ELIGIBLE_SW,
   },
   major: {
     totalMinCredits: 60,
@@ -184,6 +206,7 @@ const rule_전자융합공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 27,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -217,6 +240,7 @@ const rule_전기공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -250,6 +274,7 @@ const rule_전자재료공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 27,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -283,6 +308,7 @@ const rule_로봇학부_2024_2025: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -316,6 +342,7 @@ const rule_건축공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 24,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -349,6 +376,7 @@ const rule_화학공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 27,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -382,6 +410,7 @@ const rule_환경공학과_2024_2025: GraduationRule = {
   msc: {
     minCredits: 24,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -424,6 +453,7 @@ const rule_전자공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -453,6 +483,7 @@ const rule_전자통신공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -482,6 +513,7 @@ const rule_전자융합공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -511,6 +543,7 @@ const rule_전기공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -540,6 +573,7 @@ const rule_전자재료공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -569,6 +603,7 @@ const rule_로봇학부_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -587,7 +622,7 @@ const rule_컴퓨터정보공학부_2020_2023: GraduationRule = {
   department: '컴퓨터정보공학부',
   programType: 'engineering',
   totalCreditsRequired: 133,
-  sourceNote: '졸업이수학점 p.52 (2020-2023학번)',
+  sourceNote: '공학인증제도 안내 p.47 (2020학번 적용)',
   lastUpdated: '2025-03-18',
   liberalArts: {
     mandatoryCredits: 1,
@@ -598,12 +633,13 @@ const rule_컴퓨터정보공학부_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
     designMinCredits: 12,
-    mandatoryCourseNames: ['공학설계입문', '수치해석', '산학협력캡스톤설계'],
-    mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조',
+    mandatoryCourseNames: ['공학설계입문', '산학협력캡스톤설계'],
+    mandatoryNote: '산학협력캡스톤설계1 또는 산학협력캡스톤설계2 중 1과목 이수 (수치해석은 2024학번부터 필수)',
   },
   manualChecks: [
     { id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' },
@@ -656,6 +692,7 @@ const rule_건축공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -685,6 +722,7 @@ const rule_화학공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -714,6 +752,7 @@ const rule_환경공학과_2020_2023: GraduationRule = {
   msc: {
     minCredits: 30,
     note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수',
+    eligibleCourseNames: MSC_ELIGIBLE_COMMON,
   },
   major: {
     totalMinCredits: 60,
@@ -743,7 +782,7 @@ const rule_전자공학과_2017_2019: GraduationRule = {
     balancedMinCredits: 21,
     balancedNote: '7영역 7과목×3학점=21학점 (광운인되기 2017-2019학번 미이수 가능)',
   },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -757,7 +796,7 @@ const rule_전자통신공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '예비캡스톤설계', '캡스톤설계'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -771,7 +810,7 @@ const rule_전자융합공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계1'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -785,7 +824,7 @@ const rule_전기공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -799,7 +838,7 @@ const rule_전자재료공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계1', '캡스톤설계2'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -813,7 +852,7 @@ const rule_로봇학부_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['로봇학입문', '캡스톤설계'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -827,7 +866,7 @@ const rule_컴퓨터정보공학부_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 p.52 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: {
     totalMinCredits: 60,
     designMinCredits: 12,
@@ -846,7 +885,7 @@ const rule_소프트웨어학부_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 p.53 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 12, note: '수학 최소 6학점, 기초과학 최소 3학점 포함하여 총 12학점 이상' },
+  msc: { minCredits: 12, note: '수학 최소 6학점, 기초과학 최소 3학점 포함하여 총 12학점 이상', eligibleCourseNames: MSC_ELIGIBLE_SW },
   major: {
     totalMinCredits: 60,
     designMinCredits: 12,
@@ -865,7 +904,7 @@ const rule_건축공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 p.36 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 9, mandatoryCourseNames: ['공학설계입문'], mandatoryNote: '건축공학과 설계학점은 9학점' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -879,7 +918,7 @@ const rule_화학공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 p.36-37 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계심화'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };
@@ -893,7 +932,7 @@ const rule_환경공학과_2017_2019: GraduationRule = {
   sourceNote: '졸업이수학점 p.37-38 (2017-2019학번)',
   lastUpdated: '2025-03-18',
   liberalArts: { mandatoryCredits: 0, mandatoryCourses: [], balancedMinCredits: 21, balancedNote: '7영역 7과목×3학점=21학점' },
-  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수' },
+  msc: { minCredits: 30, note: '수학·기초과학·전산학 영역에서 필수과목 포함하여 이수', eligibleCourseNames: MSC_ELIGIBLE_COMMON },
   major: { totalMinCredits: 60, designMinCredits: 12, mandatoryCourseNames: ['공학설계입문', '캡스톤설계', '환경기초실험', '환경공정실험', '환경반응공학'], mandatoryNote: '전공필수 과목 목록은 학과 홈페이지 참조' },
   manualChecks: [{ id: 'engineering_program', title: '공학프로그램 이수 여부', description: '공학 교육인증 프로그램으로 졸업하는 경우 해당 요건 확인 필요' }],
 };

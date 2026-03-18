@@ -300,13 +300,20 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
           />
           <div>
             <Text style={{ fontSize: 13, fontWeight: 500 }}>
-              {excludeCurrentSemester ? '현재 학기 제외' : '현재 학기 포함'}
+              {excludeCurrentSemester ? '최근 학기 제외' : '최근 학기 포함'}
             </Text>
-            {result.currentSemester && (
-              <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
-                ({result.currentSemester.year}년 {result.currentSemester.semester}학기 {excludeCurrentSemester ? '제외됨' : '포함됨'})
-              </Text>
-            )}
+            {excludeCurrentSemester
+              ? result.excludedSemester && (
+                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
+                  ({result.excludedSemester.year}년 {result.excludedSemester.semester}학기 제외됨)
+                </Text>
+              )
+              : result.currentSemester && (
+                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
+                  (최신학기: {result.currentSemester.year}년 {result.currentSemester.semester}학기)
+                </Text>
+              )
+            }
           </div>
           <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
             성적이 미확정인 경우 제외하고 계산
