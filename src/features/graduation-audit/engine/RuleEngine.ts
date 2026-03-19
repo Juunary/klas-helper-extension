@@ -319,49 +319,83 @@ export class GraduationAuditEngine {
   }
 
   /**
-   * 전공필수 과목 심사
+   * 전공필수 과목 심사 (mandatoryCourseNames + mandatoryCourseGroups)
    */
   private checkMandatoryCourses(
     courses: StudentCourse[],
-    mandatoryCourseNames: string[]
+    rule: GraduationRule
   ): RequirementResult {
     const passed = getPassedCourses(courses);
+    const mandatoryCourseNames = rule.major.mandatoryCourseNames;
+    const groups = rule.major.mandatoryCourseGroups ?? [];
 
     const matchedCourses = mandatoryCourseNames
       .map((name) => passed.find((c) => courseNameMatch(c.name, name)))
       .filter((c): c is StudentCourse => c !== undefined);
 
-    const missing = mandatoryCourseNames.filter((name) => !passed.some((c) => courseNameMatch(c.name, name)));
+    const missingNames = mandatoryCourseNames.filter((name) => !passed.some((c) => courseNameMatch(c.name, name)));
+    const missingGroupLabels: string[] = [];
+
+    for (const group of groups) {
+      const minCount = group.minCount ?? 1;
+      const matchedInGroup = group.courses.filter((name) => passed.some((c) => courseNameMatch(c.name, name)));
+      // 그룹 내 과목도 matchedCourses에 추가
+      for (const name of matchedInGroup) {
+        const found = passed.find((c) => courseNameMatch(c.name, name));
+        if (found && !matchedCourses.includes(found)) matchedCourses.push(found);
+      }
+      if (matchedInGroup.length < minCount) {
+        missingGroupLabels.push(`[택${minCount}] ${group.courses.join(' / ')}`);
+      }
+    }
+
+    const allMissing = [...missingNames, ...missingGroupLabels];
+    const required = mandatoryCourseNames.length + groups.length;
+    const earnedCount = (mandatoryCourseNames.length - missingNames.length) + (groups.length - missingGroupLabels.length);
 
     return {
       id: 'mandatory_courses',
       title: '전공필수 과목',
-      status: missing.length === 0 ? 'pass' : 'fail',
-      earned: matchedCourses.length,
-      required: mandatoryCourseNames.length,
-      detail: missing.length === 0 ? '이수 완료' : `미이수: ${missing.join(', ')}`,
-      missing: missing.length > 0 ? { items: missing } : undefined,
+      status: allMissing.length === 0 ? 'pass' : 'fail',
+      earned: earnedCount,
+      required,
+      detail: allMissing.length === 0 ? '이수 완료' : `미이수: ${allMissing.join(', ')}`,
+      missing: allMissing.length > 0 ? { items: allMissing } : undefined,
       matchedCourses,
+    };
+  }
+
+  /**
+   * 교양 총 학점 심사 (liberalArts.totalMinCredits가 정의된 경우)
+   * 광운인되기 폐지 이후 총 교양학점 조건을 체크한다.
+   */
+  private checkLiberalArtsTotal(courses: StudentCourse[], rule: GraduationRule): RequirementResult {
+    const liberalArtsCourses = getPassedCourses(courses).filter((c) => isLiberalArtsClassification(c.classification));
+    const earned = liberalArtsCourses.reduce((sum, course) => sum + course.credits, 0);
+    const required = rule.liberalArts.totalMinCredits!;
+
+    return {
+      id: 'liberal_arts_total',
+      title: '교양 총 학점',
+      status: earned >= required ? 'pass' : 'fail',
+      earned,
+      required,
+      detail: `${earned}학점 / ${required}학점`,
+      matchedCourses: liberalArtsCourses,
+      sourceNote: rule.sourceNote,
     };
   }
 
   /**
    * 학생 졸업 심사 실행
    */
-  audit(studentData: StudentData, rule: GraduationRule, options?: { excludeCurrentSemester?: boolean }): AuditResult {
-    // currentSemester: raw sungjuk 기준 최신 학기 (성적 미확정 학기 포함, UI 표시용)
+  audit(studentData: StudentData, rule: GraduationRule, options?: { includeCurrentSemester?: boolean }): AuditResult {
     const currentSemester = studentData.currentSemester ?? detectCurrentSemester(studentData.courses);
-    // lastCompletedSemester: 실제 성적이 있는 마지막 학기 (제외 대상)
-    const lastCompletedSemester = detectCurrentSemester(studentData.courses);
 
-    let courses = studentData.courses;
-    let excludedSemester: { year: number; semester: number } | undefined;
-    if (options?.excludeCurrentSemester && lastCompletedSemester) {
-      excludedSemester = lastCompletedSemester;
-      courses = courses.filter(
-        (c) => !(c.year === lastCompletedSemester.year && c.semester === lastCompletedSemester.semester)
-      );
-    }
+    // 현재 학기 포함 옵션이 켜져 있으면 inProgressCourses를 합산
+    const courses = options?.includeCurrentSemester
+      ? [...studentData.courses, ...(studentData.inProgressCourses ?? [])]
+      : studentData.courses;
 
     const deduplicated = deduplicateCoursesByName(courses);
 
@@ -372,8 +406,12 @@ export class GraduationAuditEngine {
       this.checkMSCCredits(deduplicated, rule),
       this.checkLiberalArtsMandatory(deduplicated, rule),
       this.checkLiberalArtsBalanced(deduplicated, rule),
-      this.checkMandatoryCourses(deduplicated, rule.major.mandatoryCourseNames),
+      this.checkMandatoryCourses(deduplicated, rule),
     ];
+
+    if (rule.liberalArts.totalMinCredits !== undefined) {
+      requirements.push(this.checkLiberalArtsTotal(deduplicated, rule));
+    }
 
     // 총 진행률 계산 (통과 항목 수 / 전체 항목 수)
     const passCount = requirements.filter((r) => r.status === 'pass').length;
@@ -406,8 +444,7 @@ export class GraduationAuditEngine {
       department: studentData.department,
       appliedRule: rule,
       currentSemester: currentSemester ?? undefined,
-      excludedSemester,
-      excludedCurrentSemester: options?.excludeCurrentSemester ?? false,
+      includedCurrentSemester: options?.includeCurrentSemester ?? false,
       overallStatus,
       totalCredits,
       requirements,
@@ -422,7 +459,7 @@ export class GraduationAuditEngine {
   /**
    * 학생에게 적용할 규칙을 선택하고 심사 실행
    */
-  auditStudent(studentData: StudentData, options?: { excludeCurrentSemester?: boolean }): AuditResult {
+  auditStudent(studentData: StudentData, options?: { includeCurrentSemester?: boolean }): AuditResult {
     const selection = this.ruleRegistry.selectRule(
       studentData.admissionYear,
       studentData.college,

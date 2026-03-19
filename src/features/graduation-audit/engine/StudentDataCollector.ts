@@ -120,6 +120,8 @@ function getDepartmentInfo(
  *   ]
  * }
  */
+const VALID_GRADES: Grade[] = ['A+', 'A0', 'B+', 'B0', 'C+', 'C0', 'D+', 'D0', 'F', 'P', 'NP'];
+
 function extractCourses(sungjuk: any[]): StudentCourse[] {
   const courses: StudentCourse[] = [];
 
@@ -146,30 +148,56 @@ function extractCourses(sungjuk: any[]): StudentCourse[] {
       const gradeStr = (lectureData.getGrade || '').trim().split(' ')[0] as Grade;
       const code = lectureData.gwamokNo ? (lectureData.gwamokNo as string).trim() : undefined;
 
-      // 필수 필드 검증
-      if (!name || !classification || Number.isNaN(credits) || !gradeStr) {
-        continue;
-      }
+      if (!name || !classification || Number.isNaN(credits) || !gradeStr) continue;
+      if (!VALID_GRADES.includes(gradeStr)) continue;
 
-      // 성적이 유효한지 확인
-      const validGrades: Grade[] = ['A+', 'A0', 'B+', 'B0', 'C+', 'C0', 'D+', 'D0', 'F', 'P', 'NP'];
-      if (!validGrades.includes(gradeStr)) {
-        continue;
-      }
-
-      courses.push({
-        year,
-        semester: sem,
-        name,
-        code,
-        classification,
-        credits,
-        grade: gradeStr,
-      });
+      courses.push({ year, semester: sem, name, code, classification, credits, grade: gradeStr });
     }
   }
 
   return courses;
+}
+
+/**
+ * 현재 학기(currentSemester) 수강 중인 과목 추출
+ * 성적이 확정되지 않은 과목들을 inProgress=true, grade='P'로 반환한다.
+ */
+function extractInProgressCourses(
+  sungjuk: any[],
+  currentSemester: { year: number; semester: number }
+): StudentCourse[] {
+  const result: StudentCourse[] = [];
+
+  if (!Array.isArray(sungjuk)) return result;
+
+  for (const semester of sungjuk) {
+    if (!semester || typeof semester !== 'object') continue;
+
+    const year = parseInt(semester.thisYear, 10);
+    const sem = parseInt(semester.hakgi, 10);
+
+    if (year !== currentSemester.year || sem !== currentSemester.semester) continue;
+    if (!Array.isArray(semester.sungjukList)) continue;
+
+    for (const lectureData of semester.sungjukList) {
+      if (!lectureData || typeof lectureData !== 'object') continue;
+
+      const name = (lectureData.gwamokKname || '').trim();
+      const classification = ((lectureData.codeName1 || '').trim()) as CourseClassification;
+      const credits = parseInt(lectureData.hakjumNum, 10);
+      const code = lectureData.gwamokNo ? (lectureData.gwamokNo as string).trim() : undefined;
+
+      if (!name || !classification || Number.isNaN(credits) || credits <= 0) continue;
+
+      // 이미 성적이 확정된 과목은 제외 (extractCourses에서 이미 처리)
+      const gradeStr = (lectureData.getGrade || '').trim().split(' ')[0] as Grade;
+      if (VALID_GRADES.includes(gradeStr)) continue;
+
+      result.push({ year, semester: sem, name, code, classification, credits, grade: 'P', inProgress: true });
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -220,7 +248,6 @@ export function collectStudentData(): StudentData {
   const courses = extractCourses(sungjuk);
 
   // 성적 유효성과 무관하게 sungjuk 원본에서 최신 학기 감지
-  // (현재 학기는 성적 미확정이라 courses에 없을 수 있음)
   let currentSemester: { year: number; semester: number } | undefined;
   for (const s of sungjuk) {
     const y = parseInt(s.thisYear, 10);
@@ -231,6 +258,11 @@ export function collectStudentData(): StudentData {
     }
   }
 
+  // 현재 학기 수강 중인 과목 추출 (성적 미확정)
+  const inProgressCourses = currentSemester
+    ? extractInProgressCourses(sungjuk, currentSemester)
+    : [];
+
   return {
     studentId,
     admissionYear,
@@ -238,6 +270,7 @@ export function collectStudentData(): StudentData {
     college: deptInfo.college,
     department: deptInfo.department,
     courses,
+    inProgressCourses,
     currentSemester,
   };
 }

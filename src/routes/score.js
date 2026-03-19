@@ -177,7 +177,12 @@ const injectGraduationAuditButton = () => {
   `);
 
   button.click(() => {
-    showGraduationAuditPanel();
+    const panelId = 'graduation-audit-panel';
+    if ($(`#${panelId}`).length > 0) {
+      $(`#${panelId}`).remove();
+    } else {
+      showGraduationAuditPanel();
+    }
   });
 
   $('#synthesis-score-table').after(button);
@@ -188,12 +193,6 @@ const injectGraduationAuditButton = () => {
  */
 const showGraduationAuditPanel = () => {
   const panelId = 'graduation-audit-panel';
-
-  // 이미 열려있으면 스크롤만
-  if ($(`#${panelId}`).length > 0) {
-    $(`#${panelId}`)[0].scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
 
   // 새 패널 생성
   const panel = $(`

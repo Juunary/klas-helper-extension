@@ -50,7 +50,8 @@
         "dark.css",
         "app.js",
         "app.css",
-        "data/everytime-lectures.json"
+        "data/everytime-lectures.json",
+        "data/graduation-rules.json"
       ]
     },
     {

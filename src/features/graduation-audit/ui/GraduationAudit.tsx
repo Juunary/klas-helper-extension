@@ -75,7 +75,10 @@ const CourseTable: React.FC<{ courses: StudentCourse[]; emptyText?: string }> = 
               </td>
               <td style={{ padding: '5px 8px', textAlign: 'center' }}>{c.credits}학점</td>
               <td style={{ padding: '5px 8px', textAlign: 'center' }}>
-                <span style={{ fontWeight: 700, color: gradeColor(c.grade) }}>{c.grade}</span>
+                {c.inProgress
+                  ? <Tag color="processing" style={{ margin: 0, fontSize: 11 }}>수강중</Tag>
+                  : <span style={{ fontWeight: 700, color: gradeColor(c.grade) }}>{c.grade}</span>
+                }
               </td>
               <td style={{ padding: '5px 8px', textAlign: 'center', whiteSpace: 'nowrap', color: '#888' }}>
                 {c.year}-{c.semester}
@@ -122,8 +125,12 @@ const MandatoryChecklist: React.FC<{
 };
 
 /** 요건 카드 내 상세 내용 */
-const RequirementDetail: React.FC<{ req: RequirementResult; rule: { major: { mandatoryCourseNames: string[] }; liberalArts: { mandatoryCourses: string[] } } | null }> = ({ req, rule }) => {
+const RequirementDetail: React.FC<{
+  req: RequirementResult;
+  rule: { major: { mandatoryCourseNames: string[]; prerequisiteCourses?: string[] }; liberalArts: { mandatoryCourses: string[] } } | null;
+}> = ({ req, rule }) => {
   const isMandatory = req.id === 'mandatory_courses' || req.id === 'liberal_arts_mandatory';
+  const prerequisiteCourses = req.id === 'mandatory_courses' ? (rule?.major.prerequisiteCourses ?? []) : [];
 
   return (
     <div>
@@ -154,6 +161,20 @@ const RequirementDetail: React.FC<{ req: RequirementResult; rule: { major: { man
           />
         </>
       )}
+
+      {prerequisiteCourses.length > 0 && (
+        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: '#e6f7ff', borderRadius: 6, border: '1px solid #91d5ff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <QuestionCircleOutlined style={{ color: '#1890ff', fontSize: 13 }} />
+            <Text style={{ fontSize: 12, fontWeight: 600, color: '#1890ff' }}>선수과목 안내 (졸업 요건 아님)</Text>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {prerequisiteCourses.map((name) => (
+              <Tag key={name} color="blue" style={{ fontSize: 11, margin: 0 }}>{name}</Tag>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -162,18 +183,18 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AuditResult | null>(null);
-  const [excludeCurrentSemester, setExcludeCurrentSemester] = useState(false);
+  const [includeCurrentSemester, setIncludeCurrentSemester] = useState(false);
 
-  const runAudit = useCallback(async (exclude: boolean) => {
+  const runAudit = useCallback(async (include: boolean) => {
     try {
       setLoading(true);
       setError(null);
 
       const { createRuleRegistry } = await import('../engine/RuleRegistry');
-      const ruleRegistry = createRuleRegistry();
+      const ruleRegistry = await createRuleRegistry();
       const studentData = collectStudentData();
       const engine = new GraduationAuditEngine(ruleRegistry);
-      const auditResult = engine.auditStudent(studentData, { excludeCurrentSemester: exclude });
+      const auditResult = engine.auditStudent(studentData, { includeCurrentSemester: include });
       setResult(auditResult);
     }
     catch (err) {
@@ -185,8 +206,8 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
   }, []);
 
   useEffect(() => {
-    runAudit(excludeCurrentSemester);
-  }, [runAudit, excludeCurrentSemester]);
+    runAudit(includeCurrentSemester);
+  }, [runAudit, includeCurrentSemester]);
 
   if (loading) {
     return (
@@ -294,29 +315,21 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
         {/* 현재 학기 포함/제외 토글 */}
         <div style={{ marginBottom: 16, padding: '10px 12px', backgroundColor: '#f6f8fa', borderRadius: 6, border: '1px solid #e8e8e8', display: 'flex', alignItems: 'center', gap: 12 }}>
           <Switch
-            checked={excludeCurrentSemester}
-            onChange={(v) => setExcludeCurrentSemester(v)}
+            checked={includeCurrentSemester}
+            onChange={(v) => setIncludeCurrentSemester(v)}
             size="small"
           />
           <div>
-            <Text style={{ fontSize: 13, fontWeight: 500 }}>
-              {excludeCurrentSemester ? '최근 학기 제외' : '최근 학기 포함'}
-            </Text>
-            {excludeCurrentSemester
-              ? result.excludedSemester && (
-                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
-                  ({result.excludedSemester.year}년 {result.excludedSemester.semester}학기 제외됨)
-                </Text>
-              )
-              : result.currentSemester && (
-                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
-                  (최신학기: {result.currentSemester.year}년 {result.currentSemester.semester}학기)
-                </Text>
-              )
-            }
+            <Text style={{ fontSize: 13, fontWeight: 500 }}>현재 학기 포함</Text>
+            {result.currentSemester && (
+              <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
+                ({result.currentSemester.year}년 {result.currentSemester.semester}학기
+                {includeCurrentSemester ? ' 포함됨' : ' 미포함'})
+              </Text>
+            )}
           </div>
           <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
-            성적이 미확정인 경우 제외하고 계산
+            수강 중인 과목을 이수 예정으로 계산
           </Text>
         </div>
 
@@ -352,7 +365,7 @@ const GraduationAudit: React.FC<GraduationAuditProps> = ({ onClose }) => {
         <Card title="요건별 상세 현황" style={{ marginBottom: 16 }}>
           <Collapse
             items={requirementItems}
-            defaultActiveKey={result.requirements.filter((r) => r.status !== 'pass').map((r) => r.id)}
+            defaultActiveKey={[]}
           />
         </Card>
       )}

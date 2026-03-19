@@ -47,6 +47,7 @@ const config: Configuration = {
         { from: 'public', to: '.' },
         { from: 'manifest.json', to: '.' },
         { from: 'packages/data/src/everytime-lectures/everytime-lectures.json', to: 'data/everytime-lectures.json' },
+        { from: 'src/features/graduation-audit/data/graduation-rules.json', to: 'data/graduation-rules.json' },
       ],
     }),
   ],

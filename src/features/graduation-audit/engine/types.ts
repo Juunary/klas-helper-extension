@@ -11,6 +11,7 @@ export interface StudentCourse {
   classification: CourseClassification;  // 이수구분 (전필, 전선, 기필, 기선, 교필, 교선, 일선)
   credits: number;               // 학점
   grade: Grade;                  // 성적 (A+, A0, B+, B0, C+, C0, D+, D0, F, P, NP)
+  inProgress?: boolean;          // 현재 수강 중 (성적 미확정)
 }
 
 /** 이수구분 */
@@ -33,13 +34,22 @@ export interface StudentData {
   departmentCode: number;        // 학과코드 (e.g., 706)
   college: string;               // 단과대명 (e.g., "전자정보공과대학")
   department: string;            // 학과명 (e.g., "전자공학과")
-  courses: StudentCourse[];      // 수강 이력
+  courses: StudentCourse[];             // 완료된 수강 이력 (성적 확정)
+  inProgressCourses?: StudentCourse[]; // 현재 학기 수강 중인 과목 (성적 미확정, grade='P' 임시처리)
   currentSemester?: { year: number; semester: number };  // sungjuk 원본에서 감지한 최신 학기 (성적 미확정 학기 포함)
+}
+
+/** 전공필수 택1 그룹 (e.g., 캡스톤설계1 또는 2 중 1과목 이수) */
+export interface MandatoryCourseGroup {
+  type: 'oneOf';          // 현재는 택1 유형만 지원
+  courses: string[];      // 선택 가능한 과목명 목록
+  minCount?: number;      // 최소 이수 수 (기본값 1)
+  description?: string;   // UI 표시용 설명 (선택)
 }
 
 /** 졸업 요건 규칙 */
 export interface GraduationRule {
-  admissionYears: number[];      // 적용 입학년도 배열 (e.g., [2024, 2025])
+  admissionYears: number[];      // 적용 입학년도 배열 (e.g., [2024])
   college: string;
   department: string;
   programType: 'engineering' | 'general';
@@ -48,6 +58,7 @@ export interface GraduationRule {
   lastUpdated: string;           // 마지막 업데이트 날짜
 
   liberalArts: {
+    totalMinCredits?: number;    // 교양 총 최소 학점 (필수+균형 합산, 광운인되기 폐지 연도에 사용)
     mandatoryCredits: number;    // 필수교양 학점
     mandatoryCourses: string[];  // 필수교양 과목명
     balancedMinCredits: number;  // 균형교양 최소 학점
@@ -64,8 +75,10 @@ export interface GraduationRule {
   major: {
     totalMinCredits: number;     // 전공 최소 학점
     designMinCredits: number;    // 설계학점 최소 (e.g., 12)
-    mandatoryCourseNames: string[];  // 전공필수 과목명
+    mandatoryCourseNames: string[];  // 전공필수 과목명 (모두 이수 필요)
+    mandatoryCourseGroups?: MandatoryCourseGroup[];  // 택1 그룹 (그룹 내 minCount 이상 이수 필요)
     mandatoryNote?: string;      // 설명
+    prerequisiteCourses?: string[];  // 선수/후수 과목 (표시 전용, 졸업 판정 제외)
   };
 
   manualChecks: ManualCheckItem[];
@@ -102,8 +115,7 @@ export interface AuditResult {
   department: string;
   appliedRule: GraduationRule | null;  // 적용된 규칙 (없으면 null)
   currentSemester?: { year: number; semester: number };  // raw sungjuk 기준 최신 학기 (성적 미확정 포함)
-  excludedSemester?: { year: number; semester: number }; // 실제로 제외된 학기 (성적이 있는 마지막 학기)
-  excludedCurrentSemester?: boolean;  // 현재 학기 제외 여부
+  includedCurrentSemester?: boolean;  // 현재 학기 포함 여부
 
   overallStatus: 'eligible' | 'pending' | 'ineligible' | 'unregistered';
   // eligible: 졸업 가능
